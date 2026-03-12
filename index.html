@@ -61,12 +61,6 @@
   }
   .logo-text span { color: var(--yellow); }
   .header-right { display: flex; align-items: center; gap: 8px; }
-  #active-domain-badge {
-    display: none;
-    padding: 3px 10px; border-radius: 6px;
-    font-size: 0.68rem; font-weight: 700;
-    background: var(--yellow); color: var(--black);
-  }
   #btn-reset {
     display: none;
     background: transparent;
@@ -77,26 +71,6 @@
     transition: all 0.2s;
   }
   #btn-reset:hover { border-color: var(--yellow); color: var(--yellow); }
-
-  /* ── DOMAIN NAV ── */
-  #domain-nav {
-    background: var(--white);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    display: flex; align-items: center; gap: 2px;
-    flex-shrink: 0; height: 42px;
-    overflow-x: auto;
-  }
-  .domain-btn {
-    padding: 5px 12px; border-radius: 6px; cursor: pointer;
-    font-size: 0.7rem; font-weight: 700;
-    font-family: 'Nunito Sans', sans-serif;
-    transition: all 0.2s; border: none;
-    background: transparent; color: var(--grey-mid);
-    white-space: nowrap;
-  }
-  .domain-btn:hover { background: var(--grey-faint); color: var(--grey-dark); }
-  .domain-btn.active { background: var(--black); color: var(--yellow); }
 
   /* ── MAIN ── */
   #main {
@@ -297,19 +271,10 @@
       <div class="logo-text">GeoExpert <span>IA</span></div>
     </div>
     <div class="header-right">
-      <div id="active-domain-badge"></div>
       <button id="btn-reset">Nouvelle session</button>
     </div>
   </header>
 
-  <!-- DOMAIN NAV -->
-  <div id="domain-nav">
-    <button class="domain-btn" data-id="geotechnique">Géotechnique</button>
-    <button class="domain-btn" data-id="hydrologie">Hydrologie</button>
-    <button class="domain-btn" data-id="gestion_eaux">Eaux pluviales</button>
-    <button class="domain-btn" data-id="vrd">VRD</button>
-    <button class="domain-btn" data-id="soutenement">Soutènements</button>
-  </div>
 
   <!-- MAIN -->
   <div id="main">
@@ -453,15 +418,6 @@ Règles pour les SVG :
 - Signale les points de vigilance et risques
 - Si une question est hors compétence ou manque de données, indique-le clairement`;
 
-const DOMAINS = {
-  geotechnique: { label: "Géotechnique" },
-  hydrologie:   { label: "Hydrologie" },
-  gestion_eaux: { label: "Eaux pluviales" },
-  vrd:          { label: "VRD" },
-  soutenement:  { label: "Soutènements" },
-};
-
-let activeDomain = null;
 let conversationHistory = [];
 let isLoading = false;
 
@@ -472,32 +428,6 @@ const inputBox   = document.getElementById('input-box');
 const userInput  = document.getElementById('user-input');
 const btnSend    = document.getElementById('btn-send');
 const btnReset   = document.getElementById('btn-reset');
-const badge      = document.getElementById('active-domain-badge');
-
-document.querySelectorAll('.domain-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const id = btn.dataset.id;
-    if (activeDomain === id) {
-      activeDomain = null;
-      document.querySelectorAll('.domain-btn').forEach(b => b.classList.remove('active'));
-      badge.style.display = 'none';
-      updatePlaceholder();
-    } else {
-      document.querySelectorAll('.domain-btn').forEach(b => b.classList.remove('active'));
-      activeDomain = id;
-      btn.classList.add('active');
-      badge.style.display = 'inline-block';
-      badge.textContent = DOMAINS[id].label;
-      updatePlaceholder();
-    }
-  });
-});
-
-function updatePlaceholder() {
-  userInput.placeholder = activeDomain
-    ? `Question ${DOMAINS[activeDomain].label.toLowerCase()}...`
-    : 'Posez votre question technique...';
-}
 
 userInput.addEventListener('input', () => {
   userInput.style.height = 'auto';
@@ -534,9 +464,7 @@ async function sendMessage(text) {
   const typingId = 'typing-' + Date.now();
   appendTyping(typingId);
 
-  const sysPrompt = activeDomain
-    ? SYSTEM_PROMPT + `\n\nDomaine prioritaire de cette session : ${DOMAINS[activeDomain].label}`
-    : SYSTEM_PROMPT;
+  const sysPrompt = SYSTEM_PROMPT;
 
   try {
     const res = await fetch('/api/chat', {
@@ -606,10 +534,6 @@ function resetSession() {
   welcome.style.display = 'flex';
   inputZone.classList.remove('with-border');
   btnReset.style.display = 'none';
-  document.querySelectorAll('.domain-btn').forEach(b => b.classList.remove('active'));
-  activeDomain = null;
-  badge.style.display = 'none';
-  updatePlaceholder();
 }
 
 function escapeHtml(text) {
