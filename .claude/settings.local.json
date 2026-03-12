@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:www.geosolia.com)",
+      "Bash(ls -d /c/PROJETS/*geosolia* /c/PROJETS/*GEOSOLIA* /c/PROJETS/*Geosolia*)",
+      "Bash(ls -d /c/PROJETS/[0-9]*)",
+      "Bash(find /c/PROJETS -maxdepth 3 -iname *geosolia*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh repo:*)",
+      "Bash(git push:*)",
+      "Bash(npx vercel:*)",
+      "Bash(npm install:*)",
+      "Bash(where node:*)",
+      "Bash(where npm:*)",
+      "Bash(where npx:*)",
+      "Read(//c/Program Files/**)",
+      "Read(//c/Users/vsalaud/AppData/Roaming/**)",
+      "Bash(cmd.exe //c \"where node\")",
+      "Bash(cmd.exe //c \"where npm\")"
+    ]
+  }
+}
