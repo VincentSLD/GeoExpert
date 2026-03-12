@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>GeoExpert IA</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23F2B705'/><text x='16' y='22' text-anchor='middle' font-family='sans-serif' font-size='16' font-weight='900' fill='%231A1A1A'>GE</text></svg>">
 <style>
@@ -31,13 +31,13 @@
     --radius:       10px;
   }
 
-  html, body { height: 100%; background: var(--white); font-family: 'Nunito Sans', sans-serif; color: var(--text); overflow: hidden; }
+  html, body { height: 100%; background: var(--white); font-family: 'Nunito Sans', sans-serif; color: var(--text); overflow: hidden; -webkit-text-size-adjust: 100%; }
 
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--grey-light); border-radius: 4px; }
 
-  #app { display: flex; flex-direction: column; height: 100vh; }
+  #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
 
   /* ── HEADER ── */
   #header {
@@ -254,11 +254,33 @@
   }
 
   @media(max-width:640px){
-    #header { padding: 0 1rem; }
-    #domain-nav { padding: 0 0.5rem; }
-    #main { padding: 0 1rem; }
-    #quick-grid { grid-template-columns: 1fr; }
+    #header { padding: 0 0.75rem; height: 48px; }
+    .logo-icon { width: 30px; height: 30px; font-size: 0.65rem; }
+    .logo-text { font-size: 1rem; }
+    #btn-reset { font-size: 0.65rem; padding: 4px 10px; }
+
+    #main { padding: 0 0.75rem; }
+
     .welcome-title { font-size: 1.4rem; }
+    .welcome-desc { font-size: 0.8rem; max-width: 100%; }
+    #welcome { padding: 1.5rem 0.5rem; gap: 1rem; }
+
+    #messages { padding: 1rem 0; gap: 0.75rem; }
+    .msg-row { gap: 6px; }
+    .avatar { width: 28px; height: 28px; font-size: 0.55rem; border-radius: 6px; }
+    .bubble { max-width: 88%; padding: 10px 12px; font-size: 0.82rem; line-height: 1.6; border-radius: 8px; }
+    .bubble h3 { font-size: 0.85rem; }
+    .bubble h4 { font-size: 0.78rem; }
+    .bubble table { font-size: 0.72rem; display: block; overflow-x: auto; white-space: nowrap; }
+    .bubble th, .bubble td { padding: 4px 6px; }
+    .bubble pre { font-size: 0.72rem; padding: 8px 10px; }
+    .bubble .resultat-box { padding: 10px 12px; font-size: 0.82rem; }
+
+    #input-zone { padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom, 0px)); }
+    #input-box { padding: 6px 8px; gap: 6px; }
+    #user-input { font-size: 16px; }
+    #btn-send { width: 36px; height: 36px; }
+    .footer-disclaimer { font-size: 0.55rem; }
   }
 </style>
 </head>
