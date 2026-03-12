@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GeoExpert IA</title>
+<style>
+@font-face{font-family:'Nunito Sans';font-weight:100 900;font-style:normal;font-display:swap;src:url('https://fonts.gstatic.com/s/nunitosans/v15/pe0TMImSLYBIv1o4X1M8ce2xCx3yop4tQpF_MeTm0lfGWVpNn64CL7U8upHZIbMV51Q42ptCp5F5bxqqtQ1yiU4GCC5XvVUl.woff2') format('woff2')}
+@font-face{font-family:'Playfair Display';font-weight:700;font-style:normal;font-display:swap;src:url('https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKd3vXDXbtXK-F2qC0usEw.woff2') format('woff2')}
+</style>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --yellow:       #F2B705;
+    --yellow-light: #F5C842;
+    --yellow-dark:  #D9A004;
+    --yellow-pale:  #FFF8E1;
+    --yellow-glow:  rgba(242,183,5,0.25);
+    --black:        #1A1A1A;
+    --black-soft:   #2D2D2D;
+    --grey-dark:    #4A4A4A;
+    --grey-mid:     #7A7A7A;
+    --grey-light:   #D4D4D4;
+    --grey-faint:   #F5F5F5;
+    --white:        #FFFFFF;
+    --border:       #E8E8E8;
+    --text:         #1A1A1A;
+    --shadow:       0 1px 4px rgba(0,0,0,0.06);
+    --radius:       10px;
+  }
+
+  html, body { height: 100%; background: var(--white); font-family: 'Nunito Sans', sans-serif; color: var(--text); overflow: hidden; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--grey-light); border-radius: 4px; }
+
+  #app { display: flex; flex-direction: column; height: 100vh; }
+
+  /* ── HEADER ── */
+  #header {
+    background: var(--black);
+    padding: 0 2rem;
+    height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: var(--yellow);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 0.75rem; color: var(--black);
+    box-shadow: 0 2px 8px var(--yellow-glow);
+  }
+  .logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem; font-weight: 700; color: #fff;
+  }
+  .logo-text span { color: var(--yellow); }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  #active-domain-badge {
+    display: none;
+    padding: 3px 10px; border-radius: 6px;
+    font-size: 0.68rem; font-weight: 700;
+    background: var(--yellow); color: var(--black);
+  }
+  #btn-reset {
+    display: none;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.6); padding: 5px 12px; border-radius: 6px;
+    cursor: pointer; font-size: 0.7rem;
+    font-family: 'Nunito Sans', sans-serif; font-weight: 700;
+    transition: all 0.2s;
+  }
+  #btn-reset:hover { border-color: var(--yellow); color: var(--yellow); }
+
+  /* ── DOMAIN NAV ── */
+  #domain-nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; gap: 2px;
+    flex-shrink: 0; height: 42px;
+    overflow-x: auto;
+  }
+  .domain-btn {
+    padding: 5px 12px; border-radius: 6px; cursor: pointer;
+    font-size: 0.7rem; font-weight: 700;
+    font-family: 'Nunito Sans', sans-serif;
+    transition: all 0.2s; border: none;
+    background: transparent; color: var(--grey-mid);
+    white-space: nowrap;
+  }
+  .domain-btn:hover { background: var(--grey-faint); color: var(--grey-dark); }
+  .domain-btn.active { background: var(--black); color: var(--yellow); }
+
+  /* ── MAIN ── */
+  #main {
+    flex: 1; display: flex; flex-direction: column;
+    max-width: 800px; width: 100%; margin: 0 auto;
+    padding: 0 1.5rem; overflow: hidden;
+  }
+
+  /* ── WELCOME ── */
+  #welcome {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 2rem 1rem; gap: 1.5rem;
+  }
+  .welcome-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem; font-weight: 700; color: var(--black);
+    line-height: 1.2;
+  }
+  .welcome-title span { color: var(--yellow); }
+  .welcome-desc {
+    color: var(--grey-mid); font-size: 0.85rem;
+    line-height: 1.6; max-width: 480px;
+  }
+
+  /* ── MESSAGES ── */
+  #messages {
+    flex: 1; overflow-y: auto;
+    padding: 1.5rem 0; display: flex;
+    flex-direction: column; gap: 1rem;
+  }
+  .msg-row { display: flex; gap: 10px; align-items: flex-start; animation: fadeUp 0.25s ease; }
+  .msg-row.user { flex-direction: row-reverse; }
+
+  .avatar {
+    width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 800;
+    font-family: 'Nunito Sans', sans-serif;
+  }
+  .avatar.user { background: var(--grey-faint); color: var(--grey-mid); }
+  .avatar.assistant { background: var(--yellow); color: var(--black); }
+
+  .bubble {
+    max-width: 80%; padding: 12px 14px;
+    font-size: 0.85rem; line-height: 1.7; border-radius: 8px;
+  }
+  .bubble.user {
+    background: var(--grey-faint); color: var(--text);
+  }
+  .bubble.assistant {
+    background: var(--white); color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .bubble h3 {
+    font-family: 'Nunito Sans', sans-serif;
+    color: var(--black); font-size: 0.9rem;
+    margin: 0.8rem 0 0.3rem; font-weight: 800;
+  }
+  .bubble h3:first-child { margin-top: 0; }
+  .bubble h4 {
+    font-family: 'Nunito Sans', sans-serif;
+    color: var(--grey-dark); font-size: 0.82rem;
+    margin: 0.6rem 0 0.2rem; font-weight: 700;
+  }
+  .bubble ul, .bubble ol { padding-left: 1.2rem; margin: 0.2rem 0; }
+  .bubble li { margin-bottom: 2px; }
+  .bubble strong { font-weight: 800; }
+  .bubble em { color: var(--grey-dark); }
+  .bubble p { margin: 0.15rem 0; }
+  .bubble table {
+    width: 100%; border-collapse: collapse;
+    margin: 0.5rem 0; font-size: 0.78rem;
+  }
+  .bubble th {
+    background: var(--grey-faint); color: var(--black);
+    padding: 5px 8px; text-align: left;
+    font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .bubble td {
+    padding: 5px 8px; border-bottom: 1px solid var(--border);
+  }
+  .bubble code {
+    background: var(--grey-faint); color: var(--grey-dark);
+    padding: 1px 5px; border-radius: 4px;
+    font-size: 0.8rem; font-family: monospace;
+  }
+  .bubble pre {
+    background: var(--black); color: #D4D4D4;
+    border-radius: 8px; padding: 10px 12px;
+    overflow-x: auto; margin: 0.4rem 0;
+    font-size: 0.78rem; font-family: monospace;
+    white-space: pre-wrap;
+  }
+
+  /* Note de calcul — bloc résultat */
+  .bubble .resultat-box {
+    background: var(--yellow-pale);
+    border: 2px solid var(--yellow);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 0.6rem 0;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+  .bubble .resultat-box strong { color: var(--black); }
+
+  /* Schémas SVG inline */
+  .bubble .schema-svg {
+    margin: 0.6rem 0;
+    text-align: center;
+    overflow-x: auto;
+  }
+  .bubble .schema-svg svg {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  /* Typing */
+  .typing-bubble {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px; display: flex; gap: 5px; align-items: center;
+  }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--yellow); animation: pulse 1.4s ease-in-out infinite;
+  }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+
+  /* ── INPUT ── */
+  #input-zone { padding: 0.6rem 0 1rem; flex-shrink: 0; }
+  #input-zone.with-border { border-top: 1px solid var(--border); }
+  #input-box {
+    background: var(--grey-faint);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex; align-items: flex-end; gap: 8px;
+    padding: 8px 10px; transition: border-color 0.2s;
+  }
+  #input-box.focused { border-color: var(--yellow); }
+  #user-input {
+    flex: 1; resize: none; background: transparent;
+    border: none; color: var(--text); font-size: 0.85rem;
+    font-family: 'Nunito Sans', sans-serif; line-height: 1.5;
+    max-height: 120px; overflow-y: auto; outline: none;
+  }
+  #user-input::placeholder { color: var(--grey-mid); }
+  #btn-send {
+    width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0;
+    background: var(--border); border: none; cursor: not-allowed;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; color: var(--grey-mid);
+  }
+  #btn-send.active { background: var(--yellow); color: var(--black); cursor: pointer; }
+  #btn-send.active:hover { background: var(--yellow-light); }
+
+  #input-footer {
+    display: flex; justify-content: center;
+    margin-top: 4px;
+  }
+  .footer-disclaimer {
+    font-size: 0.6rem; color: var(--grey-light);
+  }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(6px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes pulse {
+    0%,100%{ opacity:0.3; transform:scale(0.85); }
+    50%    { opacity:1;   transform:scale(1); }
+  }
+
+  @media(max-width:640px){
+    #header { padding: 0 1rem; }
+    #domain-nav { padding: 0 0.5rem; }
+    #main { padding: 0 1rem; }
+    #quick-grid { grid-template-columns: 1fr; }
+    .welcome-title { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <header id="header">
+    <div class="header-left">
+      <div class="logo-icon">GE</div>
+      <div class="logo-text">GeoExpert <span>IA</span></div>
+    </div>
+    <div class="header-right">
+      <div id="active-domain-badge"></div>
+      <button id="btn-reset">Nouvelle session</button>
+    </div>
+  </header>
+
+  <!-- DOMAIN NAV -->
+  <div id="domain-nav">
+    <button class="domain-btn" data-id="geotechnique">Géotechnique</button>
+    <button class="domain-btn" data-id="hydrologie">Hydrologie</button>
+    <button class="domain-btn" data-id="gestion_eaux">Eaux pluviales</button>
+    <button class="domain-btn" data-id="vrd">VRD</button>
+    <button class="domain-btn" data-id="soutenement">Soutènements</button>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+
+    <!-- WELCOME -->
+    <div id="welcome">
+      <h1 class="welcome-title">GeoExpert <span>IA</span></h1>
+      <p class="welcome-desc">
+        Assistant technique spécialisé en géotechnique, hydrologie, VRD, soutènements et parasismique.
+      </p>
+
+
+
+    </div>
+
+    <!-- MESSAGES -->
+    <div id="messages" style="display:none;"></div>
+
+    <!-- INPUT -->
+    <div id="input-zone">
+      <div id="input-box">
+        <textarea id="user-input" rows="1"
+          placeholder="Posez votre question technique..."
+        ></textarea>
+        <button id="btn-send" title="Envoyer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+        </button>
+      </div>
+      <div id="input-footer">
+        <div class="footer-disclaimer">Réponses indicatives — vérification par un ingénieur requise</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+const SYSTEM_PROMPT = `Tu es GeoExpert, l'assistant technique intelligent de GPH (Génie Parasismique de l'Habitat), bureau d'études de sol et de structure dédié à l'habitat individuel, implanté dans le Grand Ouest (Challans, Nantes, Niort, Pau). GPH fait partie du groupe Novam Ingénierie.
+
+Tu es un ingénieur expert polyvalent de très haut niveau, spécialisé dans les domaines suivants :
+
+## GÉOTECHNIQUE & PARASISMIQUE
+- Reconnaissance des sols : sondages carottés, SPT, CPT/CPTU, pressiomètre Ménard, scissomètre, dilatomètre
+- Classification des sols : USCS, GTR, LCPC
+- Fondations superficielles : calcul de portance (Terzaghi, Meyerhof, Hansen, Vesic, Eurocode 7), tassements (méthode œdométrique, Boussinesq, Skempton-Bjerrum)
+- Fondations profondes : pieux forés, battus, vissés ; méthode pressiométrique (Fascicule 62 titre V), méthode CPT ; frottement latéral, résistance en pointe
+- Stabilité des pentes et talus : méthode de Bishop simplifié, Fellenius/Petterson, Spencer, Morgenstern-Price
+- Traitement des sols : colonnes ballastées, jet grouting, compactage dynamique, préchargement, drains verticaux
+- Études G1, G2 AVP, G2 PRO, G5 (Loi ELAN, NF P 94-500)
+- Parasismique : Eurocode 8 (NF EN 1998), arrêté du 22/10/2010, zones de sismicité française (1 à 5)
+- Classification des ouvrages : catégorie I à IV, importance γI
+- Spectre de réponse élastique : spectre de type 1 et 2, classes de sol A à E (EC8)
+- Liquéfaction : méthode Seed & Idriss, indice de potentiel de liquéfaction IL, NF P 94-261
+- Stabilité sismique des pentes : méthode de Newmark, méthode pseudo-statique
+- Effets de site : amplification sismique, VS30, HVSR (Nakamura)
+- Interaction sol-structure : fondations sismiques, pieux sous séisme
+- Mononobe-Okabe pour les soutènements sous séisme
+- Dispositions constructives Loi ELAN pour les fondations renforcées
+
+## HYDROLOGIE
+- Hydrologie statistique : loi de Gumbel, GEV, ajustement fréquentiel, temps de retour (T=10, 50, 100, 1000 ans)
+- Bassins versants : délimitation, temps de concentration (Kirpich, Passini, Ventura), coefficient de ruissellement
+- Modèles pluie-débit : méthode rationnelle, SCS-CN, HEC-HMS
+- Crues de projet : débit de pointe, hydrogramme unitaire, méthode des isochrones
+- Étiages : débits d'étiage QMNA5, VCN10, analyse des basses eaux
+- Hydraulique fluviale : profils en long, courbe de remous (Manning-Strickler), HEC-RAS
+
+## GESTION DES EAUX PLUVIALES ET ASSAINISSEMENT
+- Réseau d'assainissement : dimensionnement des collecteurs (méthode rationnelle, Manning-Strickler)
+- Techniques alternatives : noues, tranchées drainantes, chaussées drainantes, toitures végétalisées, puits d'infiltration
+- Bassins de rétention/infiltration : volume de stockage, débit de fuite, vidange
+- Gestion à la source : essai Porchet, Matsuo
+- NF EN 752, DTU 60.11, guide CEREMA
+- Stations d'épuration : filières de traitement, dimensionnement
+
+## VRD / VOIRIE
+- Terrassements : cubatures, profils en travers, mouvement des terres
+- Dimensionnement des chaussées : méthode LCPC/SETRA, catalogue des structures, CBR, module EV2
+- Matériaux routiers : GNT, grave bitume, béton bitumineux (BBSG, BBM, BBDr)
+- Couches de forme : plateforme PF1 à PF4, traitement à la chaux, au ciment
+- Réseaux enterrés : coordination de travaux
+- Signalisation : ICTAAL, ICTAVRU
+- Accessibilité PMR, éclairage public EN 13201
+
+## SOUTÈNEMENTS
+- Murs poids, murs en béton armé, murs préfabriqués
+- Rideaux de palplanches : méthode de Blum, RIDO/PLAXIS
+- Parois moulées : guide CFMS, dimensionnement ELU et ELS
+- Parois berlinoises : profilés HEB
+- Soutènements cloués : béton projeté, auscultation
+- Tirants d'ancrage : NF EN 1537, essais de réception
+- Terre Armée, géogrilles
+- Pression des terres : Rankine, Coulomb
+
+## NORMES ET RÉFÉRENCES
+- Eurocodes : EC1, EC2, EC3, EC7, EC8
+- Normes françaises NF P 94-xxx (sols : reconnaissance, essais)
+- Fascicule 62 titre V (fondations profondes)
+- BAEL, BPEL pour le béton
+- Instructions techniques des routes nationales (ICTAAL, ICTAVRU)
+- Guides CEREMA, SETRA, LCPC
+- DTU relatifs aux travaux de terrassement et VRD
+- NF P 94-500 (missions géotechniques G1 à G5)
+
+## FORMAT DE RÉPONSE — NOTE DE CALCUL
+
+Quand l'utilisateur pose une question impliquant un calcul, structure TOUJOURS ta réponse comme une note de calcul professionnelle :
+
+### Structure obligatoire :
+1. **## Objet** — description en une phrase
+2. **## Hypothèses** — liste des données d'entrée et hypothèses retenues
+3. **## Normes applicables** — références normatives utilisées
+4. **## Calcul** — développement pas à pas, avec formules et applications numériques. Utilise une notation explicite : q_u = c·Nc·sc + q·Nq·sq + 0.5·γ·B·Nγ·sγ. Présente les valeurs intermédiaires.
+5. **## Résultat** — encadre le résultat final avec \`[RESULTAT]\` et \`[/RESULTAT]\` pour le mettre en valeur. Exemple :
+   \`[RESULTAT]\`
+   **Portance admissible : q_adm = 185 kPa**
+   \`[/RESULTAT]\`
+6. **## Vérifications** — vérifications complémentaires si pertinent (ELS, sismique, etc.)
+7. **## Points de vigilance** — risques, limites, recommandations
+
+### Schémas techniques SVG
+Quand un schéma aide à la compréhension (coupe de sol, diagramme de forces, géométrie de fondation, profil en travers, etc.), génère un schéma SVG inline. Utilise le format :
+\`\`\`svg
+<svg>...</svg>
+\`\`\`
+
+Règles pour les SVG :
+- Dimensions : viewBox="0 0 600 300" (paysage) ou "0 0 400 500" (portrait)
+- Couleurs : fond blanc, traits #1A1A1A, cotes en #D9A004 (jaune), hachures sol en #7A7A7A
+- Texte : font-family="sans-serif", font-size adapté (10-14px)
+- Style technique : lignes de cote avec flèches, hachures pour le sol, niveaux d'eau en bleu (#3D7AB5)
+- Légendes claires et cotations en mètres/kPa
+- Génère des schémas pour : coupes géotechniques, profils de fondation, diagrammes de pression des terres, coupes de chaussée, profils hydrauliques, spectres sismiques
+
+### Comportement général
+- Rigueur technique irréprochable
+- Cite systématiquement les normes et méthodes
+- Propose des vérifications et alternatives
+- Signale les points de vigilance et risques
+- Si une question est hors compétence ou manque de données, indique-le clairement`;
+
+const DOMAINS = {
+  geotechnique: { label: "Géotechnique" },
+  hydrologie:   { label: "Hydrologie" },
+  gestion_eaux: { label: "Eaux pluviales" },
+  vrd:          { label: "VRD" },
+  soutenement:  { label: "Soutènements" },
+};
+
+let activeDomain = null;
+let conversationHistory = [];
+let isLoading = false;
+
+const welcome    = document.getElementById('welcome');
+const messagesEl = document.getElementById('messages');
+const inputZone  = document.getElementById('input-zone');
+const inputBox   = document.getElementById('input-box');
+const userInput  = document.getElementById('user-input');
+const btnSend    = document.getElementById('btn-send');
+const btnReset   = document.getElementById('btn-reset');
+const badge      = document.getElementById('active-domain-badge');
+
+document.querySelectorAll('.domain-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.dataset.id;
+    if (activeDomain === id) {
+      activeDomain = null;
+      document.querySelectorAll('.domain-btn').forEach(b => b.classList.remove('active'));
+      badge.style.display = 'none';
+      updatePlaceholder();
+    } else {
+      document.querySelectorAll('.domain-btn').forEach(b => b.classList.remove('active'));
+      activeDomain = id;
+      btn.classList.add('active');
+      badge.style.display = 'inline-block';
+      badge.textContent = DOMAINS[id].label;
+      updatePlaceholder();
+    }
+  });
+});
+
+function updatePlaceholder() {
+  userInput.placeholder = activeDomain
+    ? `Question ${DOMAINS[activeDomain].label.toLowerCase()}...`
+    : 'Posez votre question technique...';
+}
+
+userInput.addEventListener('input', () => {
+  userInput.style.height = 'auto';
+  userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
+  btnSend.classList.toggle('active', userInput.value.trim().length > 0);
+});
+userInput.addEventListener('focus',  () => inputBox.classList.add('focused'));
+userInput.addEventListener('blur',   () => inputBox.classList.remove('focused'));
+userInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+btnSend.addEventListener('click', () => sendMessage());
+btnReset.addEventListener('click', resetSession);
+
+async function sendMessage(text) {
+  const userText = text || userInput.value.trim();
+  if (!userText || isLoading) return;
+
+  userInput.value = '';
+  userInput.style.height = 'auto';
+  btnSend.classList.remove('active');
+  isLoading = true;
+
+  if (welcome.style.display !== 'none') {
+    welcome.style.display = 'none';
+    messagesEl.style.display = 'flex';
+    inputZone.classList.add('with-border');
+    btnReset.style.display = 'block';
+  }
+
+  appendMessage('user', userText);
+  conversationHistory.push({ role: 'user', content: userText });
+
+  const typingId = 'typing-' + Date.now();
+  appendTyping(typingId);
+
+  const sysPrompt = activeDomain
+    ? SYSTEM_PROMPT + `\n\nDomaine prioritaire de cette session : ${DOMAINS[activeDomain].label}`
+    : SYSTEM_PROMPT;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        system: sysPrompt,
+        messages: conversationHistory,
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.map(b => b.text || '').join('') || 'Erreur de réponse.';
+    removeTyping(typingId);
+    appendMessage('assistant', reply);
+    conversationHistory.push({ role: 'assistant', content: reply });
+  } catch (err) {
+    removeTyping(typingId);
+    appendMessage('assistant', 'Erreur de connexion. Vérifiez votre réseau.');
+  }
+  isLoading = false;
+}
+
+function appendMessage(role, content) {
+  const row = document.createElement('div');
+  row.className = 'msg-row ' + role;
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar ' + role;
+  avatar.textContent = role === 'user' ? 'V' : 'GE';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + role;
+  bubble.innerHTML = role === 'user'
+    ? escapeHtml(content).replace(/\n/g, '<br>')
+    : formatMarkdown(content);
+  row.appendChild(avatar);
+  row.appendChild(bubble);
+  messagesEl.appendChild(row);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function appendTyping(id) {
+  const row = document.createElement('div');
+  row.className = 'msg-row assistant';
+  row.id = id;
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar assistant';
+  avatar.textContent = 'GE';
+  const bubble = document.createElement('div');
+  bubble.className = 'typing-bubble';
+  bubble.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+  row.appendChild(avatar);
+  row.appendChild(bubble);
+  messagesEl.appendChild(row);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function removeTyping(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+function resetSession() {
+  conversationHistory = [];
+  messagesEl.innerHTML = '';
+  messagesEl.style.display = 'none';
+  welcome.style.display = 'flex';
+  inputZone.classList.remove('with-border');
+  btnReset.style.display = 'none';
+  document.querySelectorAll('.domain-btn').forEach(b => b.classList.remove('active'));
+  activeDomain = null;
+  badge.style.display = 'none';
+  updatePlaceholder();
+}
+
+function escapeHtml(text) {
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function formatMarkdown(text) {
+  // Extract SVG blocks before escaping HTML
+  const svgBlocks = [];
+  text = text.replace(/```svg\n?([\s\S]*?)```/g, (_, svg) => {
+    svgBlocks.push(svg.trim());
+    return `%%SVG_${svgBlocks.length - 1}%%`;
+  });
+
+  let html = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  // Restore SVG blocks (raw, not escaped)
+  html = html.replace(/%%SVG_(\d+)%%/g, (_, i) => `<div class="schema-svg">${svgBlocks[i]}</div>`);
+
+  // Resultat boxes
+  html = html.replace(/\[RESULTAT\]([\s\S]*?)\[\/RESULTAT\]/g, (_, content) => {
+    return `<div class="resultat-box">${content.trim()}</div>`;
+  });
+
+  html = html.replace(/```[\w]*\n?([\s\S]*?)```/g, (_,c) => `<pre>${c.trim()}</pre>`);
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  html = html.replace(/((?:\|.+\|\n?)+)/g, match => {
+    const rows = match.trim().split('\n').filter(r => r.trim());
+    if (rows.length < 2) return match;
+    let table = '<table>';
+    rows.forEach((row, i) => {
+      if (/^\|[-: |]+\|$/.test(row.trim())) return;
+      const cells = row.split('|').slice(1,-1);
+      const tag = i === 0 ? 'th' : 'td';
+      table += '<tr>' + cells.map(c => `<${tag}>${c.trim()}</${tag}>`).join('') + '</tr>';
+    });
+    return table + '</table>';
+  });
+  html = html.replace(/^### (.+)$/gm, '<h4>$1</h4>');
+  html = html.replace(/^## (.+)$/gm,  '<h3>$1</h3>');
+  html = html.replace(/^# (.+)$/gm,   '<h3>$1</h3>');
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/__([^_]+)__/g,     '<strong>$1</strong>');
+  html = html.replace(/\*([^*]+)\*/g,     '<em>$1</em>');
+  html = html.replace(/((?:^\d+\..+\n?)+)/gm, match => {
+    const items = match.trim().split('\n').map(l => `<li>${l.replace(/^\d+\.\s*/,'')}</li>`).join('');
+    return `<ol>${items}</ol>`;
+  });
+  html = html.replace(/((?:^[-*•] .+\n?)+)/gm, match => {
+    const items = match.trim().split('\n').map(l => `<li>${l.replace(/^[-*•] /,'')}</li>`).join('');
+    return `<ul>${items}</ul>`;
+  });
+  html = html.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>');
+  html = '<p>' + html + '</p>';
+  html = html.replace(/<p>\s*<\/p>/g,'');
+  ['h3','h4','ul','ol','pre','table'].forEach(tag => {
+    html = html.replace(new RegExp(`<p>(<${tag}>)`,'g'),'$1');
+    html = html.replace(new RegExp(`(</${tag}>)<\/p>`,'g'),'$1');
+  });
+  return html;
+}
+</script>
+</body>
+</html>
