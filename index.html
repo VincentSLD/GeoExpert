@@ -431,19 +431,35 @@ Quand l'utilisateur pose une question impliquant un calcul, structure TOUJOURS t
 6. **## Vérifications** — vérifications complémentaires si pertinent (ELS, sismique, etc.)
 7. **## Points de vigilance** — risques, limites, recommandations
 
-### Schémas techniques SVG
-Quand un schéma aide à la compréhension (coupe de sol, diagramme de forces, géométrie de fondation, profil en travers, etc.), génère un schéma SVG inline. Utilise le format :
+### Schémas techniques SVG — OBLIGATOIRE
+Tu DOIS TOUJOURS inclure au moins un schéma SVG dans chaque réponse de calcul. Place-le après la section ## Hypothèses ou après ## Calcul selon la pertinence.
+
+Format EXACT à utiliser (avec les triple backticks svg) :
 \`\`\`svg
-<svg>...</svg>
+<svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg">...</svg>
 \`\`\`
 
-Règles pour les SVG :
-- Dimensions : viewBox="0 0 600 300" (paysage) ou "0 0 400 500" (portrait)
-- Couleurs : fond blanc, traits #1A1A1A, cotes en #D9A004 (jaune), hachures sol en #7A7A7A
-- Texte : font-family="sans-serif", font-size adapté (10-14px)
-- Style technique : lignes de cote avec flèches, hachures pour le sol, niveaux d'eau en bleu (#3D7AB5)
-- Légendes claires et cotations en mètres/kPa
-- Génère des schémas pour : coupes géotechniques, profils de fondation, diagrammes de pression des terres, coupes de chaussée, profils hydrauliques, spectres sismiques
+Exemple complet d'un schéma de fondation superficielle :
+\`\`\`svg
+<svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="150" width="600" height="150" fill="#E8E8E8" stroke="none"/>
+  <line x1="0" y1="150" x2="600" y2="150" stroke="#7A7A7A" stroke-width="1.5"/>
+  <rect x="200" y="110" width="200" height="40" fill="#1A1A1A" stroke="#1A1A1A" stroke-width="1"/>
+  <text x="300" y="135" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="12" font-weight="bold">Fondation B=1.5m</text>
+  <line x1="200" y1="160" x2="400" y2="160" stroke="#D9A004" stroke-width="1.5"/>
+  <text x="300" y="175" text-anchor="middle" fill="#D9A004" font-family="sans-serif" font-size="11">B = 1.50 m</text>
+  <text x="50" y="200" fill="#7A7A7A" font-family="sans-serif" font-size="10">Sol : c=20kPa, φ=30°</text>
+  <line x1="180" y1="110" x2="180" y2="150" stroke="#D9A004" stroke-width="1" stroke-dasharray="4"/>
+  <text x="170" y="130" text-anchor="end" fill="#D9A004" font-family="sans-serif" font-size="10">D=1.0m</text>
+</svg>
+\`\`\`
+
+Règles :
+- viewBox="0 0 600 300" (paysage) ou "0 0 400 500" (portrait)
+- Traits : #1A1A1A, cotes : #D9A004 (jaune), sol/hachures : #7A7A7A, eau : #3D7AB5
+- font-family="sans-serif", tailles 10-14px
+- Toujours inclure : cotations, légendes, valeurs numériques
+- Types de schémas : coupes de sol, fondations, diagrammes de pression, coupes de chaussée, profils hydrauliques, spectres sismiques, rideaux de palplanches
 
 ### Comportement général
 - Rigueur technique irréprochable
@@ -543,7 +559,7 @@ async function sendMessage(text) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
+        max_tokens: 8192,
         system: sysPrompt,
         messages: conversationHistory,
       })
@@ -628,11 +644,6 @@ function formatMarkdown(text) {
   // Restore SVG blocks (raw, not escaped)
   html = html.replace(/%%SVG_(\d+)%%/g, (_, i) => `<div class="schema-svg">${svgBlocks[i]}</div>`);
 
-  // Resultat boxes
-  html = html.replace(/\[RESULTAT\]([\s\S]*?)\[\/RESULTAT\]/g, (_, content) => {
-    return `<div class="resultat-box">${content.trim()}</div>`;
-  });
-
   html = html.replace(/```[\w]*\n?([\s\S]*?)```/g, (_,c) => `<pre>${c.trim()}</pre>`);
   html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
   html = html.replace(/((?:\|.+\|\n?)+)/g, match => {
@@ -651,6 +662,11 @@ function formatMarkdown(text) {
   html = html.replace(/^## (.+)$/gm,  '<h3>$1</h3>');
   html = html.replace(/^# (.+)$/gm,   '<h3>$1</h3>');
   html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+  // Resultat boxes (after bold processing so **text** inside is already converted)
+  html = html.replace(/\[RESULTAT\]([\s\S]*?)\[\/RESULTAT\]/g, (_, content) => {
+    return `<div class="resultat-box">${content.trim()}</div>`;
+  });
   html = html.replace(/__([^_]+)__/g,     '<strong>$1</strong>');
   html = html.replace(/\*([^*]+)\*/g,     '<em>$1</em>');
   html = html.replace(/((?:^\d+\..+\n?)+)/gm, match => {
